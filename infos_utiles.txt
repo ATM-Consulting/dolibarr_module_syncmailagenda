@@ -1,0 +1,8 @@
+Sur GMAIL :
+
+Adresse de la boite de mails reçus : {imap.gmail.com:993/imap/ssl}INBOX
+Adresse de la boite de mails envoyés : {imap.gmail.com:993/imap/ssl}[Gmail]/Messages envoy&AOk-s
+
+Script pour générer la liste des boites mail disponibles :
+
+get_mailboxes.php
