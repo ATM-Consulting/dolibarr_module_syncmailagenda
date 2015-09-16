@@ -1,6 +1,7 @@
 #!/usr/bin/php
 <?php
 	chdir(__DIR__);
+	define('INC_FROM_CRON_SCRIPT',true);
 
 	require('config.php');
 
@@ -198,10 +199,108 @@ function sanitize_mail($from) {
 	
 }
 
+function addMail($usertodo, $from, $societe, $contact, $subject, $body, $htmlbody, $TAttachement, $time_receip,$message_id, $typeBoite , $mailto, $labelForSendMessage= false) {
+	global $db, $conf;
+
+		$event = new ActionComm($db);
+		
+		$db->query("SELECT id FROM ".MAIN_DB_PREFIX."actioncomm WHERE ref_ext = '".$message_id."' AND entity = ".$conf->entity);
+		
+		$contact_label = $contact->firstname.' '.$contact->lastname;
+		
+		if($obj = $db->fetch_object($res)) {
+			//existe déjà
+			print "L'événement existe déjà {$obj->id}<br>";
+			//$event->fetch($obj->id);
+			return false;
+		}
+		else {
+			// n'existe pas encore
+						
+			$event->ref_ext = $message_id;
+					/**
+			 * Si le mail du contact n'existe pas dans la liste des socpeople, on n'a ni le mail du contact, ni le mail du client,
+			 * étant donné que l'on cherche dans la liste des soceople uniquement.
+			 * Mais il se peut que le mail soit un mail direct d'une société, 
+			 * on veut donc quand même récupérer le nom de la société, si elle existe.
+			 */
+			if(empty($contact_label) || $contact_label == ' ') {
+				$id_soc = getSocFromMail($from);
+				//echo "*** ".$id_soc." ***<br />";
+				if($id_soc > 0) {
+					$societe = new Societe($db);
+					$societe->fetch($id_soc);
+				}
+			}
+			
+			if(!$labelForSendMessage) {
+				
+				//$event->label = "Société ".($societe ? $societe : "(Inconnue)" ).' : Mail reçu de '.($contact == " " || empty($contact) ? "(Inconnu)" : $contact).' : '.$subject ;
+				$event->label = "Société ".($societe->nom ? $societe->nom : "(inconnue)" ).' : Mail reçu de '.($contact_label == " " || empty($contact_label) ? $from : $contact_label).' - Sujet : '.$subject ;
+				
+			//} else if($typeBoite == 'Sent Mail') {
+			} else {
+				
+				//$event->label = "Mail envoyé à ".$overview->to." : ".$subject;
+				$event->label = "Mail envoyé à ".($contact_label == " " || empty($contact_label) ? $mailto : $contact_label).", Société ".($societe->nom ? $societe->nom : "(inconnue)" )." - Sujet : ".$subject;
+				
+			}
+			
+			$event->note = "Contenu du mail : <br /><br />".$body;
+			$event->datep = $time_receip;
+		
+			$event->type_code = 1;
+			$event->type = 1;
+			$event->location = '';
+			
+			$event->type_id=50;
+			
+			$event->percentage = 100;
+
+			$event->usertodo->id = $usertodo;
+			
+			if($societe->id > 0) {
+				$event->societe->id = $societe->id;
+			}
+			
+			if($contact->id > 0) {
+				$event->contact->id = $contact->id;
+			}
+			$user = new User($db);
+			$user->fetch($usertodo);
+			
+			//print_r($event);
+			if($event->add($user,1)<0) {
+				print $event->error;
+			}
+			else {
+					
+				$upload_dir = $conf->agenda->dir_output.'/'.dol_sanitizeFileName($event->id);
+				$modulepart='contract';	
+				
+				@mkdir($upload_dir);
+				file_put_contents($upload_dir.'/mail.html', $htmlbody);
+				
+				foreach($TAttachement as $filename=>$att) {
+					
+					file_put_contents($upload_dir.'/'.$filename, $att);
+					
+				}
+				print "Ajout de l'événement {$event->id}<br>";
+				// Dolidaube ?
+				$db->query("UPDATE ".MAIN_DB_PREFIX."actioncomm SET ref_ext='".$message_id."' WHERE id=".$event->id);
+				
+			}
+			
+			return true;
+		}
+		
+	
+}
 function addEvent($usertodo, $from, $societe, $contact, $subject, $body, $htmlbody, $TAttachement, $time_receip,$message_id, $typeBoite , $mailto, $labelForSendMessage= false) {
 	global $db, $conf;
 
-var_dump($time_receip, date('Y-m-d H:i', $time_receip));	
+//var_dump($time_receip, date('Y-m-d H:i', $time_receip));	
 		$event = new ActionComm($db);
 		
 		$db->query("SELECT id FROM ".MAIN_DB_PREFIX."actioncomm WHERE ref_ext = '".$message_id."' AND entity = ".$conf->entity);
