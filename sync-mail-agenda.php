@@ -13,9 +13,18 @@
 	error_reporting(E_ALL);
 	*/
 	
+	if(php_sapi_name() === 'cli') $entity = $argv[1];
+	else $entity = GETPOST('entity');
+	
+	if(empty($entity)) exit('entity ?');
+	
+	$conf->entity = $entity;
+	
 print "Debut <br />";
 
-	$res = $db->query("SELECT * FROM ".MAIN_DB_PREFIX."user_extrafields WHERE imap_connect IS NOT NULL");
+	$res = $db->query("SELECT ex.* FROM ".MAIN_DB_PREFIX."user_extrafields ex 
+		LEFT JOIN ".MAIN_DB_PREFIX."user u ON (u.rowid = ex.fk_object)
+	WHERE ex.imap_connect IS NOT NULL AND u.entity IN (0,".$entity.")");
 	
 	while($obj = $db->fetch_object($res)) {
 		print "Analyse de la boite de {$obj->imap_login}<br>";
@@ -52,9 +61,7 @@ global $db, $conf;
 	//$typeBoite = _getTypeBoiteMessage($host);
     	//var_dump($info);
     $last_message = $info->Nmsgs; 
-	
 	$nb_mail_to_parse = (empty($conf->global->IMAP_MAX_PARSE_MAIL) || $conf->global->IMAP_MAX_PARSE_MAIL > $info->Recent) ? $info->Recent : $conf->global->IMAP_MAX_PARSE_MAIL;
-	
 	if($nb_mail_to_parse<=1) $nb_mail_to_parse = 10;
 
 	$point_to_start = $last_message-$nb_mail_to_parse+1;
@@ -252,9 +259,9 @@ function addMail($usertodo, $from, $societe, $contact, $subject, $body, $htmlbod
 			
 			$m->save($PDOdb);
 			
-			$upload_dir = DOL_DATA_ROOT.'/'.$conf->entity.'/mail/'.$m->getId();
+			$upload_dir =$conf->syncmailagenda->dir_output.'/'.$m->getId();
 			
-			mkdir($upload_dir,0777,true);
+			@mkdir($upload_dir,0777,true);
 			if(!empty($htmlbody)) file_put_contents($upload_dir.'/mail.html', $htmlbody);
 			
 			foreach($TAttachement as $filename=>$att) {

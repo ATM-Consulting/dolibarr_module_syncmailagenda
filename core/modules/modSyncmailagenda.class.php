@@ -83,7 +83,7 @@ class modSyncmailagenda extends DolibarrModules
 
         // Data directories to create when module is enabled.
         // Example: this->dirs = array("/mymodule/temp");
-        $this->dirs = array();
+        $this->dirs = array('/syncmailagenda');
 
         // Config pages. Put here list of php pages
         // stored into mymodule/admin directory, used to setup module.
@@ -131,7 +131,12 @@ class modSyncmailagenda extends DolibarrModules
         $this->boxes = array(); // Boxes list
         $r = 0;
      
-        $this->rights = array(); // Permission array used by this module
+	 	$this->rights=array();
+        $this->rights[] = array($this->numero+$r, 'Télécharger les pièce jointes',null, 1 , 'read');
+		 
+		$r++;
+		
+		
         $r = 0;
 
        

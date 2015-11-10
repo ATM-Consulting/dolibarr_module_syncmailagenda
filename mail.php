@@ -36,14 +36,14 @@ function _fiche(&$m,$fk_soc) {
 	}
 	
 	
-	$upload_dir = DOL_DATA_ROOT.'/'.$conf->entity.'/mail/'.$m->getId();
+	$upload_dir =$conf->syncmailagenda->dir_output.'/'.$m->getId();
 	$urlsource = $_SERVER["PHP_SELF"] . "?id=" . $object->id.'&fk_soc='.$fk_soc;
 	
 	$var = true;
 
 	dol_include_once('/core/class/html.formfile.class.php');
 	$formfile=new FormFile($db);
-	$formfile->show_documents('mail', $filename, $upload_dir, $urlsource, 0, 0, $object->modelpdf);
+	$formfile->show_documents('syncmailagenda', $m->getId(), $upload_dir, $urlsource, 0, 0, $object->modelpdf);
 
 	?><br />
 	<div class="titre">Mail <?php echo htmlentities($m->messageid) ?></div>
