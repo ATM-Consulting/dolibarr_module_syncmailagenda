@@ -61,7 +61,7 @@ class modSyncmailagenda extends DolibarrModules
         // (where XXX is value of numeric property 'numero' of module)
         $this->description = "Synchronize mail from IMAP account into agenda";
         // Possible values for version are: 'development', 'experimental' or version
-        $this->version = '0.1';
+        $this->version = '0.9';
         // Key used in llx_const table to save module status enabled/disabled
         // (where MYMODULE is value of property name of module in uppercase)
         $this->const_name = 'MAIN_MODULE_' . strtoupper($this->name);
@@ -87,7 +87,7 @@ class modSyncmailagenda extends DolibarrModules
 
         // Config pages. Put here list of php pages
         // stored into mymodule/admin directory, used to setup module.
-	$this->config_page_url = array("admin_syncmailagenda.php@syncmailagenda");
+		$this->config_page_url = array("admin_syncmailagenda.php@syncmailagenda");
 
         // Dependencies
         // List of modules id that must be enabled if this module is enabled
@@ -116,7 +116,7 @@ class modSyncmailagenda extends DolibarrModules
         // Array to add new pages in new tabs
         // Example:
         $this->tabs = array(
-            
+            'thirdparty:+mail:Mails:syncmailagenda@syncmailagenda::/syncmailagenda/mail.php?fk_soc=__ID__'
         );
        
         if (! isset($conf->syncmailagenda->enabled)) {
