@@ -113,7 +113,7 @@ dol_fiche_head(
 </tr>
 </table><?php
 
-print 'IMAP_MAX_PARSE_MAIL '.$conf->global->IMAP_MAX_PARSE_MAIL
+print 'IMAP_MAX_PARSE_MAIL '.$conf->global->IMAP_MAX_PARSE_MAIL;
 
 llxFooter();
 
