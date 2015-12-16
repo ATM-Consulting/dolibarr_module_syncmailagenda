@@ -28,6 +28,9 @@ function _fiche(&$m,$fk_soc) {
 	llxHeader();
 	
 	if($fk_soc>0) {
+		dol_include_once('/core/lib/company.lib.php');
+		dol_include_once('/societe/class/societe.class.php');
+		
 		$object = new Societe($db);
 		$object->fetch($fk_soc);
 		
