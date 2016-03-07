@@ -9,6 +9,9 @@
 	dol_include_once('/societe/class/societe.class.php');
 	dol_include_once('/comm/action/class/actioncomm.class.php');
 
+
+	if(empty($conf->syncmailagenda->enabled)) exit;
+
 	/*ini_set('display_errors',1);
 	error_reporting(E_ALL);
 	*/
