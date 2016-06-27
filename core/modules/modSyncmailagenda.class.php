@@ -118,32 +118,32 @@ class modSyncmailagenda extends DolibarrModules
         $this->tabs = array(
             'thirdparty:+mail:Mails:syncmailagenda@syncmailagenda::/syncmailagenda/mail.php?fk_soc=__ID__'
         );
-       
+
         if (! isset($conf->syncmailagenda->enabled)) {
             $conf->syncmailagenda=new stdClass();
             $conf->syncmailagenda->enabled = 0;
         }
         $this->dictionnaries = array();
-        
+
 
         // Boxes
         // Add here list of php file(s) stored in core/boxes that contains class to show a box.
         $this->boxes = array(); // Boxes list
         $r = 0;
-     
+
 	 	$this->rights=array();
         $this->rights[] = array($this->numero+$r, 'Télécharger les pièce jointes',null, 1 , 'read');
-		 
+
 		$r++;
-		
-		
+
+
         $r = 0;
 
-       
+
         $this->menus = array(); // List of menus to add
         $r = 0;
 
-        
+
     }
 
     /**
@@ -169,6 +169,11 @@ class modSyncmailagenda extends DolibarrModules
 		$res = $extrafields->addExtraField('imap_sent_mailbox', 'IMAP Boite d\'envoi', 'varchar', 0, '255', 'user');
 		$res = $extrafields->addExtraField('imap_login', 'IMAP Email', 'varchar', 0, '255', 'user');
 		$res = $extrafields->addExtraField('imap_password', 'IMAP Password', 'varchar', 0, '255', 'user');
+
+		define('INC_FROM_DOLIBARR',true);
+
+		dol_include_once('/syncmailagenda/config.php');
+		dol_include_once('/syncmailagenda/script/create-maj-base.php');
 
         return $this->_init($sql, $options);
     }
@@ -198,6 +203,6 @@ class modSyncmailagenda extends DolibarrModules
      */
     private function loadTables()
     {
-        return $this->_load_tables('/mymodule/sql/');
+        return $this->_load_tables('/syncmailagenda/sql/');
     }
 }
