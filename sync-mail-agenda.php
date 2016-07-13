@@ -46,8 +46,9 @@ function _sync_mailbox($usertodo, $host, $mailbox, $login, $password, $labelForS
 	// $mbox = imap_open($host, $login, $password);
 	$mbox = imap_open($host . $mailbox, $login, $password);
 
+	var_dump($mbox);
 	if ($mbox === false) {
-		print "Connexion impossible  $host, $mailbox, $login";
+		print "Connexion impossible  $host, $mailbox, $login<br />";
 		return false;
 	} else {
 		print "Connect ok $host, $mailbox, $login<br />";
