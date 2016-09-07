@@ -18,7 +18,7 @@ else
 	$entity = GETPOST('entity');
 
 if (empty($entity))
-	exit('entity ?');
+	$entity=1;
 
 $conf->entity = $entity;
 
