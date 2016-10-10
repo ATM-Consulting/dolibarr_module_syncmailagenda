@@ -1,0 +1,3 @@
+setSYNCMAILAGENDA_ONLY_MAIL_OBJECT=Ne pas créer d'évènement, juste l'objet mail consultable sur la fiche tiers
+IMAP_MAX_PARSE_MAIL=Nombre de mail à parser par itération (100 par défaut)
+FinalizeConfHowTo=Pour finaliser votre configuration, rendez-vous sur votre fiche utilisateur

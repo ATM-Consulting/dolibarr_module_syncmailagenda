@@ -79,6 +79,7 @@ class modSyncmailagenda extends DolibarrModules
         // for specific path of parts (eg: /mymodule/core/modules/barcode)
         // for specific css file (eg: /mymodule/css/mymodule.css.php)
         $this->module_parts = array(
+        	'hooks'=>array('usercard')
         );
 
         // Data directories to create when module is enabled.
@@ -91,14 +92,14 @@ class modSyncmailagenda extends DolibarrModules
 
         // Dependencies
         // List of modules id that must be enabled if this module is enabled
-        $this->depends = array('syslog');
+        $this->depends = array();
         // List of modules id to disable if this one is disabled
         $this->requiredby = array();
         // Minimum version of PHP required by module
         $this->phpmin = array(5, 3);
         // Minimum version of Dolibarr required by module
         $this->need_dolibarr_version = array(3, 2);
-        $this->langfiles = array(); // langfiles@mymodule
+        $this->langfiles = array('syncmailagenda@syncmailagenda'); // langfiles@mymodule
         // Constants
         // List of particular constants to add when module is enabled
         // (key, 'chaine', value, desc, visible, 'current' or 'allentities', deleteonunactive)

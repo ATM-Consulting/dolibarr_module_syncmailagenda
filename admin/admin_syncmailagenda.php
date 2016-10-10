@@ -53,7 +53,7 @@ $action = GETPOST('action', 'alpha');
 switch ($action) {
 	case 'save':
    		$TDivers = isset($_REQUEST['TDivers']) ? $_REQUEST['TDivers'] : array();
-        
+      
         foreach($TDivers as $name=>$param) {
         
             dolibarr_set_const($db, $name, $param);
@@ -76,6 +76,8 @@ switch ($action) {
 $page_name = "SyncMailAgendaSetup";
 llxHeader('', $langs->trans($page_name));
 
+$langs->load('syncmailagenda@syncmailagenda');
+
 // Subheader
 $linkback = '<a href="' . DOL_URL_ROOT . '/admin/modules.php">'
     . $langs->trans("BackToModuleList") . '</a>';
@@ -91,6 +93,8 @@ dol_fiche_head(
     "syncmailagenda@syncmailagenda"
 );
 
+$formCore = new TFormCore('auto','form1','post');
+echo $formCore->hidden('action', 'save');
 ?>
 <table width="100%" class="noborder" style="background-color: #fff;">
     <tr class="liste_titre">
@@ -110,10 +114,52 @@ dol_fiche_head(
         }
     
     ?></td>             
+</tr><tr>
+    <td><?php echo $langs->trans('setIMAP_SYNC_MAIL_FROM_UNKNOWN') ?></td><td><?php
+    
+        if($conf->global->IMAP_SYNC_MAIL_FROM_UNKNOWN==0) {
+            
+             ?><a href="?action=save&TDivers[IMAP_SYNC_MAIL_FROM_UNKNOWN]=1"><?=img_picto($langs->trans("Disabled"),'switch_off'); ?></a><?php
+            
+        }
+        else {
+             ?><a href="?action=save&TDivers[IMAP_SYNC_MAIL_FROM_UNKNOWN]=0"><?=img_picto($langs->trans("Activated"),'switch_on'); ?></a><?php
+            
+        }
+    
+    ?></td>             
+</tr><tr>
+    <td><?php echo $langs->trans('setSYNCMAILAGENDA_DO_NOT_UPDATE_MSG') ?></td><td><?php
+    
+        if($conf->global->SYNCMAILAGENDA_DO_NOT_UPDATE_MSG==0) {
+            
+             ?><a href="?action=save&TDivers[SYNCMAILAGENDA_DO_NOT_UPDATE_MSG]=1"><?=img_picto($langs->trans("Disabled"),'switch_off'); ?></a><?php
+            
+        }
+        else {
+             ?><a href="?action=save&TDivers[SYNCMAILAGENDA_DO_NOT_UPDATE_MSG]=0"><?=img_picto($langs->trans("Activated"),'switch_on'); ?></a><?php
+            
+        }
+    
+    ?></td>             
 </tr>
+
+<tr>
+    <td><?php echo $langs->trans('IMAP_MAX_PARSE_MAIL') ?></td><td><?php
+    
+    echo $formCore->texte('', 'TDivers[IMAP_MAX_PARSE_MAIL]', $conf->global->IMAP_MAX_PARSE_MAIL, 10);
+    
+    ?></td>             
+</tr>
+
 </table><?php
 
-print 'IMAP_MAX_PARSE_MAIL '.$conf->global->IMAP_MAX_PARSE_MAIL.' //TODO allow config here';
+echo $langs->trans('FinalizeConfHowTo');
+
+echo '<div class="tabsAction">'.$formCore->btsubmit($langs->trans('Save'), 'bt_save').'</div>';
+
+$formCore->end();
+
 
 llxFooter();
 

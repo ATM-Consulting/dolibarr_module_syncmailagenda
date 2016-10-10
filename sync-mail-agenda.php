@@ -32,15 +32,17 @@ while ( $obj = $db->fetch_object($res) ) {
 	print "Analyse de la boite de {$obj->imap_login}<br>";
 
 	// Pour les messages reçus
-	_sync_mailbox($obj->fk_object, $obj->imap_connect, $obj->imap_inbox_mailbox, $obj->imap_login, $obj->imap_password);
+	_sync_mailbox($obj->fk_object, $obj->imap_connect, $obj->imap_inbox_mailbox, $obj->imap_login, $obj->imap_password, false, true);
 
 	// Pour les messages envoyés
-	_sync_mailbox($obj->fk_object, $obj->imap_connect, $obj->imap_sent_mailbox, $obj->imap_login, $obj->imap_password, true);
+	_sync_mailbox($obj->fk_object, $obj->imap_connect, $obj->imap_sent_mailbox, $obj->imap_login, $obj->imap_password, true, false);
 }
 
 print "Fin";
-function _sync_mailbox($usertodo, $host, $mailbox, $login, $password, $labelForSendMessage = false) {
+function _sync_mailbox($usertodo, $host, $mailbox, $login, $password, $labelForSendMessage = false, $inboxbox =true) {
 	global $db, $conf;
+
+	if(empty($mailbox)) return false;
 
 	print "Tentative de connexion : " . $host . $mailbox . "\n<br />";
 	// $mbox = imap_open($host, $login, $password);
@@ -91,11 +93,11 @@ function _sync_mailbox($usertodo, $host, $mailbox, $login, $password, $labelForS
 
 			$estUnIdDuneSociete = false;
 
-			$id_contact = (stripos($mailbox, 'inbox') !== false) ? getContactFromMail($from) : getContactFromMail($to);
+			$id_contact = $inboxbox ? getContactFromMail($from) : getContactFromMail($to);
 
 			if (! $id_contact) {
-				$id_contact = (stripos($mailbox, 'inbox') !== false) ? getSocFromMail($from) : getSocFromMail($to);
-				$estUnIdDuneSociete = true;
+				$id_contact = $inboxbox ? getSocFromMail($from) : getSocFromMail($to);
+				if($id_contact>0) $estUnIdDuneSociete = true;
 			}
 
 			if ($id_contact || ! empty($conf->global->IMAP_SYNC_MAIL_FROM_UNKNOWN)) {
@@ -113,9 +115,17 @@ function _sync_mailbox($usertodo, $host, $mailbox, $login, $password, $labelForS
 					$societe->fetch($contact->socid);
 				}
 
+				$overview->message_id = trim($overview->message_id);
+
+				if(!empty($conf->global->SYNCMAILAGENDA_DO_NOT_UPDATE_MSG) && checkEventExist($overview->message_id)) {
+					
+					continue;
+					
+				}
+
 				list ( $body, $htmlbody, $attachements ) = getmsg($mbox, $msg_number);
 				$body = nl2br($body);
-
+				
 				$messageid = ! empty($overview->message_id) ? $overview->message_id : md5($body . $htmlbody . serialize($attachements));
 				// var_dump($to,$overview->subject,$body, $messageid);
 				print "Ajout evenement(" . htmlentities($mesageid) . ") $from de la société " . $societe->nom;
@@ -196,6 +206,22 @@ function sanitize_mail($from) {
 	else
 		return '';
 }
+function checkEventExist($message_id) {
+	
+	$PDOdb = new TPDOdb();
+	$m = new TSyncMailAgenda();
+
+	if ($m->loadBy($PDOdb, $message_id, 'messageid')) {
+		print "Le mail existe déjà ".htmlentities($message_id)."<br />";
+		// $event->fetch($obj->id);
+		return true;
+	}
+	else{
+		return false;	
+	}	
+	
+}
+
 function addMail($usertodo, $from, $societe, $contact, $subject, $body, $htmlbody, $TAttachement, $time_receip, $message_id, $typeBoite, $mailto, $labelForSendMessage = false) {
 	global $db, $conf;
 
