@@ -128,7 +128,7 @@ function _sync_mailbox($usertodo, $host, $mailbox, $login, $password, $labelForS
 				
 				$messageid = ! empty($overview->message_id) ? $overview->message_id : md5($body . $htmlbody . serialize($attachements));
 				// var_dump($to,$overview->subject,$body, $messageid);
-				print "Ajout evenement(" . htmlentities($mesageid) . ") $from de la société " . $societe->nom;
+				print "Ajout evenement(" . htmlentities($messageid) . ") $from de la société " . $societe->nom;
 
 				date_default_timezone_set('Europe/Paris');
 				$t_event = strtotime($overview->date);
