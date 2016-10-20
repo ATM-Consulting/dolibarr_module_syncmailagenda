@@ -36,6 +36,8 @@ while ( $obj = $db->fetch_object($res) ) {
 
 	// Pour les messages envoyés
 	_sync_mailbox($obj->fk_object, $obj->imap_connect, $obj->imap_sent_mailbox, $obj->imap_login, $obj->imap_password, true, false);
+
+
 }
 
 print "Fin";
@@ -234,28 +236,6 @@ function addMail($usertodo, $from, $societe, $contact, $subject, $body, $htmlbod
 		// return false;
 	}
 
-	if (empty($contact_label) || $contact_label == ' ') {
-		$id_soc = getSocFromMail($from);
-		// echo "*** ".$id_soc." ***<br />";
-		if ($id_soc > 0) {
-			$societe = new Societe($db);
-			$societe->fetch($id_soc);
-		}
-	}
-
-	/*			if(!$labelForSendMessage) {
-
-	 //$event->label = "Société ".($societe ? $societe : "(Inconnue)" ).' : Mail reçu de '.($contact == " " || empty($contact) ? "(Inconnu)" : $contact).' : '.$subject ;
-	 $m->title= "Société ".($societe->nom ? $societe->nom : "(inconnue)" ).' : Mail reçu de '.($contact_label == " " || empty($contact_label) ? $from : $contact_label).' - Sujet : '.$subject ;
-
-	 //} else if($typeBoite == 'Sent Mail') {
-	 } else {
-
-	 //$event->label = "Mail envoyé à ".$overview->to." : ".$subject;
-	 $m->title = "Mail envoyé à ".($contact_label == " " || empty($contact_label) ? $mailto : $contact_label).", Société ".($societe->nom ? $societe->nom : "(inconnue)" )." - Sujet : ".$subject;
-
-	 }
-	 */
 	$m->title = $subject;
 	$m->body = $body;
 	$m->messageid = $message_id;
