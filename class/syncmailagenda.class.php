@@ -1,21 +1,32 @@
 <?php
 
-class TSyncMailAgenda extends TObjetStd {
-    function __construct() {
+class SyncMailAgenda extends SeedObject {
+   
+    public $element = 'syncmailagenda';
+    
+    public $table_element='syncmailagenda';
+    
+    function __construct($db) {
+        
+        $this->db = &$db;
+        
         global $langs;
-         
-        parent::set_table(MAIN_DB_PREFIX.'syncmailagenda');
-        parent::add_champs('messageid,mfrom,mto',array('type'=>'string', 'index'=>true));
-		parent::add_champs('fk_soc,fk_contact,fk_user',array('type'=>'integer', 'index'=>true));
-		
-        parent::add_champs('body',array('type'=>'text'));
         
-        parent::_init_vars('title');
-        parent::start();    
+        $this->fields=array(
+            'fk_soc'=>array('type'=>'integer','index'=>true)
+            ,'fk_contact'=>array('type'=>'integer','index'=>true)
+            ,'fk_user'=>array('type'=>'integer','index'=>true)
+            ,'messageid'=>array('type'=>'string','lenght'=>100,'index'=>true)
+            ,'mto'=>array('type'=>'string','lenght'=>100,'index'=>true)
+            ,'mfrom'=>array('type'=>'string','lenght'=>100,'index'=>true)
+            ,'body'=>array('type'=>'text')
+            ,'title'=>array('type'=>'string')
+        );
         
-         
+        $this->init();
+       
     }
-	
+    
 
     
 }

@@ -27,8 +27,6 @@
 require('../config.php');
 dol_include_once('/syncmailagenda/class/syncmailagenda.class.php');
 
-$PDOdb=new TPDOdb;
-
 global $db;
 
 // Libraries

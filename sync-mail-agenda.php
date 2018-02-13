@@ -230,11 +230,11 @@ function sanitize_mail($from) {
 		return '';
 }
 function checkEventExist($message_id) {
+	global $db;
 	
-	$PDOdb = new TPDOdb();
-	$m = new TSyncMailAgenda();
+	$m = new SyncMailAgenda($db);
 
-	if ($m->loadBy($PDOdb, $message_id, 'messageid')) {
+	if ($m->fetchBy($message_id, 'messageid')) {
 		print "Le mail existe déjà ".htmlentities($message_id)."<br />";
 		// $event->fetch($obj->id);
 		return true;
@@ -246,12 +246,11 @@ function checkEventExist($message_id) {
 }
 
 function addMail($usertodo, $from, $societe, $contact, $subject, $body, $htmlbody, $TAttachement, $time_receip, $message_id, $typeBoite, $mailto, $labelForSendMessage = false) {
-	global $db, $conf;
+    global $db, $conf,$user;
 
-	$PDOdb = new TPDOdb();
-	$m = new TSyncMailAgenda();
+	$m = new SyncMailAgenda($db);
 
-	if ($m->loadBy($PDOdb, $message_id, 'messageid')) {
+	if ($m->fetchBy($message_id, 'messageid')) {
 		print "Le mail existe déjà $message_id<br>";
 		// $event->fetch($obj->id);
 		// return false;
@@ -267,7 +266,7 @@ function addMail($usertodo, $from, $societe, $contact, $subject, $body, $htmlbod
 	$m->mto = $mailto;
 	$m->mfrom = $from;
 
-	$m->save($PDOdb);
+	$m->create($user);
 
 	$upload_dir = $conf->syncmailagenda->dir_output . '/' . $m->getId();
 
