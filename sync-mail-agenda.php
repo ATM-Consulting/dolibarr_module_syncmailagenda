@@ -3,6 +3,9 @@ chdir(__DIR__);
 define('INC_FROM_CRON_SCRIPT', true);
 
 require ('config.php');
+
+ini_set('memory_limit','1024M');
+
 dol_include_once('/syncmailagenda/class/syncmailagenda.class.php');
 dol_include_once('/contact/class/contact.class.php');
 dol_include_once('/societe/class/societe.class.php');
@@ -24,9 +27,9 @@ $conf->entity = $entity;
 
 print "Debut <br />";
 
-$res = $db->query("SELECT ex.* FROM " . MAIN_DB_PREFIX . "user_extrafields ex
+$res = $db->query("SELECT DISTINCT ex.* FROM " . MAIN_DB_PREFIX . "user_extrafields ex
 		LEFT JOIN " . MAIN_DB_PREFIX . "user u ON (u.rowid = ex.fk_object)
-	WHERE ex.imap_connect IS NOT NULL AND u.entity IN (0," . $entity . ")");
+	WHERE ex.imap_connect IS NOT NULL AND u.statut=1  AND u.entity IN (0," . $entity . ")");
 
 while ( $obj = $db->fetch_object($res) ) {
 	print "Analyse de la boite de {$obj->imap_login}<br>";
@@ -79,7 +82,9 @@ function _sync_mailbox($usertodo, $host, $mailbox, $login, $password, $labelForS
 	$search = $point_to_start . ":" . $last_message;
 	print "Recherche : " . $search . "<br />";
 
-	$result = imap_fetch_overview($mbox, $search, 0);
+	try {
+
+		$result = imap_fetch_overview($mbox, $search, 0);
 
 	foreach ( $result as $overview ) {
 
@@ -124,8 +129,13 @@ function _sync_mailbox($usertodo, $host, $mailbox, $login, $password, $labelForS
 					continue;
 					
 				}
-
-				list ( $body, $htmlbody, $attachements ) = getmsg($mbox, $msg_number);
+//var_dump($mbox);
+//echo '1'.$msg_number;
+//continue;
+				try {
+					list ( $body, $htmlbody, $attachements ) = getmsg($mbox, $msg_number);
+			
+//echo '2';
 				$body = nl2br($body);
 				
 				$messageid = ! empty($overview->message_id) ? $overview->message_id : md5($body . $htmlbody . serialize($attachements));
@@ -143,6 +153,12 @@ function _sync_mailbox($usertodo, $host, $mailbox, $login, $password, $labelForS
 					addMail($usertodo, $from, $societe, $contact, imap_utf8($overview->subject), $body, $htmlbody, $attachements, $t_event, $messageid, $mailbox, $to, $labelForSendMessage);
 				}
 
+
+				}
+				catch(Exception $e) {
+			                var_dump($e);
+        			}
+
 				print "<br>-----------<br>";
 			} else {
 				print "From : $from non reconnu, To : $to<br>";
@@ -150,6 +166,11 @@ function _sync_mailbox($usertodo, $host, $mailbox, $login, $password, $labelForS
 
 			flush();
 		}
+	}
+
+	}
+	catch(Exception $e) {
+		var_dump($e);
 	}
 
 	imap_close($mbox);
@@ -358,14 +379,11 @@ function getmsg($mbox, $mid) {
 	// output all the following:
 	$htmlmsg = $plainmsg = $charset = '';
 	$attachments = array ();
-
 	// HEADER
 	$h = imap_header($mbox, $mid);
 	// add code here to get date, from, to, cc, subject...
-
 	// BODY
 	$s = imap_fetchstructure($mbox, $mid);
-
 	if (! $s->parts) { // simple
 		list ( $plain, $html, $att ) = getpart($mbox, $mid, $s, 0); // pass 0 as part-number
 		$plainmsg .= $plain;
@@ -374,13 +392,11 @@ function getmsg($mbox, $mid) {
 	} else { // multipart: cycle through each part
 		foreach ( $s->parts as $partno0 => $p ) {
 			list ( $plain, $html, $att ) = getpart($mbox, $mid, $p, $partno0 + 1);
-
 			$plainmsg .= $plain;
 			$htmlmsg .= $html;
 			$attachments = array_merge($attachments, $att);
 		}
 	}
-
 	return array (
 			$plainmsg,
 			$htmlmsg,
@@ -391,6 +407,7 @@ function getpart($mbox, $mid, $p, $partno) {
 	// $partno = '1', '2', '2.1', '2.1.3', etc for multipart, 0 if simple
 	$attachments = array ();
 	// DECODE DATA
+
 	$data = ($partno) ? imap_fetchbody($mbox, $mid, $partno) : // multipart
 imap_body($mbox, $mid); // simple
 	                       // Any part may be encoded, even plain text messages, so check everything.
@@ -398,7 +415,6 @@ imap_body($mbox, $mid); // simple
 		$data = quoted_printable_decode($data);
 	elseif ($p->encoding == 3)
 		$data = base64_decode($data);
-
 		// PARAMETERS
 		// get all parameters, like charset, filenames of attachments, etc.
 	$params = array ();
@@ -438,7 +454,6 @@ imap_body($mbox, $mid); // simple
 	elseif ($p->type == 2 && $data) {
 		$plainmsg .= $data . "\n\n";
 	}
-
 	// SUBPART RECURSION
 	if ($p->parts) {
 		foreach ( $p->parts as $partno0 => $p2 ) {
@@ -470,7 +485,11 @@ imap_body($mbox, $mid); // simple
  */
 function is_utf8($str)
 {
-	return preg_match("/^(
+	$TString = str_split ( $str, 512 );
+	
+	foreach($TString as $str) {
+
+	$res = preg_match("/^(
 			 [\x09\x0A\x0D\x20-\x7E]            # ASCII
 		   | [\xC2-\xDF][\x80-\xBF]             # non-overlong 2-byte
 		   |  \xE0[\xA0-\xBF][\x80-\xBF]        # excluding overlongs
@@ -481,6 +500,10 @@ function is_utf8($str)
 		   |  \xF4[\x80-\x8F][\x80-\xBF]{2}     # plane 16
 		  )*$/x", $str
 			);
+
+		if($res)return true;
+	}
+	return false;
 }
 /**
  * Try to convert a string to UTF-8.
@@ -495,15 +518,19 @@ function force_utf8($str, $inputEnc = 'WINDOWS-1252')
 {
 	if (is_utf8($str)) // Nothing to do.
 		return $str;
-		if (strtoupper($inputEnc) === 'ISO-8859-1')
-			return utf8_encode($str);
-			if (function_exists('mb_convert_encoding'))
-				return mb_convert_encoding($str, 'UTF-8', $inputEnc);
-				if (function_exists('iconv'))
-					return iconv($inputEnc, 'UTF-8', $str);
-					// You could also just return the original string.
-					trigger_error(
-							'Cannot convert string to UTF-8 in file '
-							.__FILE__.', line '.__LINE__.'!', E_USER_WARNING
-							);
+
+	if (strtoupper($inputEnc) === 'ISO-8859-1')
+		return utf8_encode($str);
+
+	if (function_exists('mb_convert_encoding'))
+		return mb_convert_encoding($str, 'UTF-8', $inputEnc);
+
+	if (function_exists('iconv'))
+		return iconv($inputEnc, 'UTF-8', $str);
+	trigger_error(
+			'Cannot convert string to UTF-8 in file '
+		.__FILE__.', line '.__LINE__.'!', E_USER_WARNING
+	);
+
+	return $str;
 }
