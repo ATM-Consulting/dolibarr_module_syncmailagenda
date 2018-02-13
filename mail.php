@@ -6,19 +6,18 @@
 	
 	$fk_soc = GETPOST('fk_soc');
 	$action = GETPOST('action');
-	
-	$PDOdb=new TPDOdb;
+	$id = (int)GETPOST('id');
 	
 	switch($action) {
 		case 'view':
-			$m = new TSyncMailAgenda;
-			$m->load($PDOdb, GETPOST('id'),$fk_soc);
+			$m = new SyncMailAgenda($db);
+			$m->fetch($id);
 			
 			_fiche($m, $fk_soc);
 			break;
 			
 		default:
-			_liste($PDOdb, $fk_soc);
+			_liste($fk_soc);
 						
 			break;
 	}
@@ -66,7 +65,7 @@ function _fiche(&$m,$fk_soc) {
 	llxFooter();
 }
 
-function _liste(&$PDOdb, $fk_soc = 0) {
+function _liste($fk_soc = 0) {
 	global $db,$conf,$langs;
 	
 	llxHeader();
@@ -82,14 +81,12 @@ function _liste(&$PDOdb, $fk_soc = 0) {
 		dol_fiche_head($head, 'mail', $langs->trans("ThirdParty"),0,'company');
 	}
 	
-	$l=new TListviewTBS('listMail');
+	$l=new Listview($db,'listMail');
 	
-	$sql="SELECT rowid as Id, title, body, fk_user, fk_contact,date_cre FROM ".MAIN_DB_PREFIX."syncmailagenda WHERE 1";
+	$sql="SELECT rowid as Id, title, body, fk_user, fk_contact,date_creation FROM ".MAIN_DB_PREFIX."syncmailagenda WHERE 1";
 	if($fk_soc>0)$sql.=" AND fk_soc = ".$fk_soc;
 	
-	$TOrderBy = array('date_cre'=>'DESC');
-	
-	echo $l->render($PDOdb, $sql,array(
+	echo $l->render($sql,array(
 		'link'=>array(
 			'title'=>'<a href="?action=view&id=@Id@&fk_soc='.$fk_soc.'">@val@</a>'
 		)
@@ -103,10 +100,10 @@ function _liste(&$PDOdb, $fk_soc = 0) {
 		,'type'=>array(
 			'date_cre'=>'date'
 		)
-		,'liste'=>array(
-			'titre'=>''
+		,'list'=>array(
+			'title'=>''
 		)
-		,'orderBy'=>$TOrderBy
+		,'orderDown'=>'date_creation'
 		,'search'=>array(
 			'title'=>true
 		)

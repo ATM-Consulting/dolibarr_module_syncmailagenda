@@ -14,8 +14,5 @@ global $db;
 
 dol_include_once('/syncmailagenda/class/syncmailagenda.class.php');
 
-$PDOdb=new TPDOdb;
-$PDOdb->db->debug=true;
-
-$o=new TSyncMailAgenda($db);
-$o->init_db_by_vars($PDOdb);
+$o=new SyncMailAgenda($db);
+$o->init_db_by_vars();
