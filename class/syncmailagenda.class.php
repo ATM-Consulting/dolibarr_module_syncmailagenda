@@ -24,9 +24,7 @@ class SyncMailAgenda extends SeedObject {
         );
         
         $this->init();
-        
-        $this->lines = array();
-        $this->nbLines = 0;
+       
     }
     
 
