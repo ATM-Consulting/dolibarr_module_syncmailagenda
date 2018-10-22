@@ -338,7 +338,6 @@ function addEvent($usertodo, $from, $societe, $contact, $subject, $body, $htmlbo
 
 		$event->percentage = 100;
 
-		$event->usertodo->id = $usertodo;
 
 		if ($societe->id > 0) {
 			$event->societe->id = $societe->id;
@@ -350,6 +349,9 @@ function addEvent($usertodo, $from, $societe, $contact, $subject, $body, $htmlbo
 		$user = new User($db);
 		$user->fetch($usertodo);
 
+		$event->usertodo = $user;
+		$event->userownerid = $user->id;
+		
 		// print_r($event);
 		if ($event->add($user, 1) < 0) {
 			print $event->error;
