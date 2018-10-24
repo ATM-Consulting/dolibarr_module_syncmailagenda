@@ -16,23 +16,29 @@ if (empty($conf->syncmailagenda->enabled))
 
 
 if (php_sapi_name() === 'cli')
+{
 	$entity = $argv[1];
+	$eol = "\n";
+}
 else
+{
 	$entity = GETPOST('entity');
+	$eol = '<br />';
+}
 
 if (empty($entity))
 	$entity=1;
 
 $conf->entity = $entity;
 
-print "Debut <br />";
+print "Debut ".$eol.$eol;
 
 $res = $db->query("SELECT DISTINCT ex.* FROM " . MAIN_DB_PREFIX . "user_extrafields ex
 		LEFT JOIN " . MAIN_DB_PREFIX . "user u ON (u.rowid = ex.fk_object)
 	WHERE ex.imap_connect IS NOT NULL AND u.statut=1  AND u.entity IN (0," . $entity . ")");
 
 while ( $obj = $db->fetch_object($res) ) {
-	print "Analyse de la boite de {$obj->imap_login}<br>";
+	print "Analyse de la boite de {$obj->imap_login}".$eol;
 
 	// Pour les messages reçus
 	_sync_mailbox($obj->fk_object, $obj->imap_connect, $obj->imap_inbox_mailbox, $obj->imap_login, $obj->imap_password, false, true);
@@ -45,26 +51,26 @@ while ( $obj = $db->fetch_object($res) ) {
 
 print "Fin";
 function _sync_mailbox($usertodo, $host, $mailbox, $login, $password, $labelForSendMessage = false, $inboxbox =true) {
-	global $db, $conf;
+	global $db, $conf, $eol;
 
 	if(empty($mailbox)) return false;
 
-	print "Tentative de connexion : " . $host . $mailbox . "\n<br />";
+	print "Tentative de connexion : " . $host . $mailbox . $eol;
 	// $mbox = imap_open($host, $login, $password);
 	$mbox = imap_open($host . $mailbox, $login, $password);
 
 
 	if ($mbox === false) {
-		print "Connexion impossible  $host, $mailbox, $login<br />";
-		print 'ERROR IMAP : '.var_export(imap_errors(),true);
+		print "Connexion impossible  $host, $mailbox, $login".$eol;
+		print 'ERROR IMAP : '.var_export(imap_errors(),true).$eol.$eol;
 		return false;
 	} else {
-		print "Connect ok $host, $mailbox, $login<br />";
+		print "Connect ok $host, $mailbox, $login".$eol;
 	}
 
 	$info = imap_check($mbox);
 	if ($info === false) {
-		print "Erreur imap_check<br />";
+		print "Erreur imap_check".$eol.$eol;
 		return false;
 	}
 	// $typeBoite = _getTypeBoiteMessage($host);
@@ -80,7 +86,7 @@ function _sync_mailbox($usertodo, $host, $mailbox, $login, $password, $labelForS
 		$point_to_start = 1;
 
 	$search = $point_to_start . ":" . $last_message;
-	print "Recherche : " . $search . "<br />";
+	print "Recherche : " . $search . $eol;
 
 	try {
 
@@ -140,7 +146,7 @@ function _sync_mailbox($usertodo, $host, $mailbox, $login, $password, $labelForS
 				
 				$messageid = ! empty($overview->message_id) ? $overview->message_id : md5($body . $htmlbody . serialize($attachements));
 				// var_dump($to,$overview->subject,$body, $messageid);
-				print "Ajout evenement(" . htmlentities($messageid) . ") $from de la société " . $societe->nom;
+				print "Ajout evenement(" . htmlentities($messageid) . ") $from de la société " . $societe->nom.$eol;
 
 				date_default_timezone_set('Europe/Paris');
 				$t_event = strtotime($overview->date);
@@ -159,9 +165,9 @@ function _sync_mailbox($usertodo, $host, $mailbox, $login, $password, $labelForS
 			                var_dump($e);
         			}
 
-				print "<br>-----------<br>";
+				print $eol."-----------".$eol;
 			} else {
-				print "From : $from non reconnu, To : $to<br>";
+				print "From : $from non reconnu, To : $to".$eol.$eol;
 			}
 
 			flush();
@@ -246,12 +252,12 @@ function checkEventExist($message_id) {
 }
 
 function addMail($usertodo, $from, $societe, $contact, $subject, $body, $htmlbody, $TAttachement, $time_receip, $message_id, $typeBoite, $mailto, $labelForSendMessage = false) {
-    global $db, $conf,$user;
+    global $db, $conf,$user, $eol;
 
 	$m = new SyncMailAgenda($db);
 
 	if ($m->fetchBy($message_id, 'messageid')) {
-		print "Le mail existe déjà $message_id<br>";
+		print "Le mail existe déjà $message_id".$eol;
 		// $event->fetch($obj->id);
 		// return false;
 	}
@@ -278,10 +284,10 @@ function addMail($usertodo, $from, $societe, $contact, $subject, $body, $htmlbod
 
 		file_put_contents($upload_dir . '/' . $filename, $att);
 	}
-	print "Ajout du mail $message_id<br>";
+	print "Ajout du mail $message_id".$eol;
 }
 function addEvent($usertodo, $from, $societe, $contact, $subject, $body, $htmlbody, $TAttachement, $time_receip, $message_id, $typeBoite, $mailto, $labelForSendMessage = false) {
-	global $db, $conf;
+	global $db, $conf, $eol;
 
 	// var_dump($time_receip, date('Y-m-d H:i', $time_receip));
 
@@ -293,7 +299,7 @@ function addEvent($usertodo, $from, $societe, $contact, $subject, $body, $htmlbo
 
 	if ($obj = $db->fetch_object($res)) {
 		// existe déjà
-		print "L'événement existe déjà {$obj->id}<br>";
+		print "L'événement existe déjà {$obj->id}".$eol;
 		// $event->fetch($obj->id);
 		return false;
 	} else {
@@ -308,7 +314,7 @@ function addEvent($usertodo, $from, $societe, $contact, $subject, $body, $htmlbo
 		 */
 		if (empty($contact_label) || $contact_label == ' ') {
 			$id_soc = getSocFromMail($from);
-			// echo "*** ".$id_soc." ***<br />";
+			// echo "*** ".$id_soc." ***".$eol;
 			if ($id_soc > 0) {
 				$societe = new Societe($db);
 				$societe->fetch($id_soc);
@@ -327,7 +333,7 @@ function addEvent($usertodo, $from, $societe, $contact, $subject, $body, $htmlbo
 			$event->label = "Mail envoyé à " . ($contact_label == " " || empty($contact_label) ? $mailto : $contact_label) . ", Société " . ($societe->nom ? $societe->nom : "(inconnue)") . " - Sujet : " . $subject;
 		}
 
-		$event->note = "Contenu du mail : <br /><br />" . $body;
+		$event->note = "Contenu du mail : " .$eol.$eol . $body;
 		$event->datep = $time_receip;
 
 		// Si vide, le create de l'event fera ce qu'il faut pour récupérer le code avec l'attribut "type_id"
@@ -371,7 +377,7 @@ function addEvent($usertodo, $from, $societe, $contact, $subject, $body, $htmlbo
 
 				file_put_contents($upload_dir . '/' . $filename, $att);
 			}
-			print "Ajout de l'événement {$event->id}<br>";
+			print "Ajout de l'événement {$event->id}".$eol;
 			// Dolidaube ?
 			$db->query("UPDATE " . MAIN_DB_PREFIX . "actioncomm SET ref_ext='" . $message_id . "' WHERE id=" . $event->id);
 		}
