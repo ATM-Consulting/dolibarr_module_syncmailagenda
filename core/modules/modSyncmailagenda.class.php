@@ -61,7 +61,7 @@ class modSyncmailagenda extends DolibarrModules
         // (where XXX is value of numeric property 'numero' of module)
         $this->description = "Synchronize mail from IMAP account into agenda";
         // Possible values for version are: 'development', 'experimental' or version
-        $this->version = '1.0.0';
+        $this->version = '1.0.1';
         // Key used in llx_const table to save module status enabled/disabled
         // (where MYMODULE is value of property name of module in uppercase)
         $this->const_name = 'MAIN_MODULE_' . strtoupper($this->name);

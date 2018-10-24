@@ -341,10 +341,13 @@ function addEvent($usertodo, $from, $societe, $contact, $subject, $body, $htmlbo
 
 		if ($societe->id > 0) {
 			$event->societe->id = $societe->id;
+			$event->socid = $societe->id;
 		}
 
 		if ($contact->id > 0) {
 			$event->contact->id = $contact->id;
+			$event->contactid = $contact->id;
+			$event->socpeopleassigned = array($contact->id => array());
 		}
 		$user = new User($db);
 		$user->fetch($usertodo);
