@@ -330,11 +330,12 @@ function addEvent($usertodo, $from, $societe, $contact, $subject, $body, $htmlbo
 		$event->note = "Contenu du mail : <br /><br />" . $body;
 		$event->datep = $time_receip;
 
-		$event->type_code = 1;
+		// Si vide, le create de l'event fera ce qu'il faut pour récupérer le code avec l'attribut "type_id"
+//		$event->type_code = 1; 
 		$event->type = 1;
 		$event->location = '';
 
-		$event->type_id = 50;
+		$event->type_id = 50; // Correspond à AC_OTH
 
 		$event->percentage = 100;
 
