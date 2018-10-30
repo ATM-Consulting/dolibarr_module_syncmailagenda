@@ -117,7 +117,7 @@ class modSyncmailagenda extends DolibarrModules
         // Array to add new pages in new tabs
         // Example:
         $this->tabs = array(
-            'thirdparty:+mail:Mails:syncmailagenda@syncmailagenda::/syncmailagenda/mail.php?fk_soc=__ID__'
+            'thirdparty:+mail:Mails:syncmailagenda@syncmailagenda:!empty($conf->global->SYNCMAILAGENDA_ONLY_MAIL_OBJECT):/syncmailagenda/mail.php?fk_soc=__ID__'
         );
 
         if (! isset($conf->syncmailagenda->enabled)) {
